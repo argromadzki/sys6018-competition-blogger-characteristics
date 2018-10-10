@@ -1,0 +1,2 @@
+[Parallel(n_jobs=6)]: Done   5 out of   5 | elapsed: 44.3min finished
+ratio(9.000000e-01) -- n: 3906 -- alpha: 0.000092 -- mse: 4.400027 -- time: 3008.33 sec
