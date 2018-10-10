@@ -32,6 +32,7 @@ test['date_date'] = pd.to_datetime(test.date, errors='coerce')
 train = train[train['date_date'].notnull()]
 train.date = train.date_date
 train = train.drop(['date_date'], axis=1)
+
 porter = nltk.stem.porter.PorterStemmer()
 from nltk.corpus import stopwords
 stop_words = set(stopwords.words('english'))
@@ -44,8 +45,19 @@ train['tokens']=[[w for w in tokens if not w in stop_words] for tokens in train[
 train['tokens']=[[w for w in tokens if w.isalpha()] for tokens in train['tokens']]
 train['newtext'] = train['tokens'].apply(lambda x: " ".join(x))
 
+# lowercase, tokenize & stem words in text
+test['text'] = test['text'].apply(str.lower)
+test['tokens']=test['text'].apply(nltk.word_tokenize)
+test['tokens']=[[porter.stem(x) for x in tokens] for tokens in test['tokens']] # triggers a bug in nltk 3.2
+test['tokens']=[[w for w in tokens if not w in stop_words] for tokens in test['tokens']]
+test['tokens']=[[w for w in tokens if w.isalpha()] for tokens in test['tokens']]
+test['newtext'] = test['tokens'].apply(lambda x: " ".join(x))
+
+#pd.write_csv('data//Corpus.csv')
+
 # Read in product of the above
 train = pd.read_csv('data//Corpus.csv')
+test = pd.read_csv('data//Testing_Corpus.csv') # FIX change this
 
 # Create Term-Document Matrix
 #vectorizer = slr.feature_extraction.text.CountVectorizer()
@@ -54,12 +66,14 @@ train = pd.read_csv('data//Corpus.csv')
 # Create reduced-dimension TDM
 vectorizer_min = slr.feature_extraction.text.CountVectorizer(min_df=.0005)
 tdm_reduced = vectorizer_min.fit_transform(train['newtext'].astype('U'))
-
+tdm_test_reduced = vectorizer_min.transform(test['newtext'].astype('U'))
 
 # TFIDF transform
 transformer = slr.feature_extraction.text.TfidfTransformer(smooth_idf=False)
 tfidf = transformer.fit_transform(tdm_reduced)
+tfidf_test = transformer.transform(tdm_test_reduced)
 
 sp.sparse.save_npz("data//Training_TF_IDF_02.npz", tfidf)
+sp.sparse.save_npz("data//Testing_TF_IDF_02.npz", tfidf_test)
 
 
