@@ -64,9 +64,13 @@ test['newtext'] = test['tokens'].apply(lambda x: " ".join(x))
 
 #pd.write_csv('data//Corpus.csv')
 
+train.to_csv("data//Training_oneperuser.csv")
+
 # Read in product of the above
 train = pd.read_csv('data//Corpus.csv')
 test = pd.read_csv('data//Testing_Corpus.csv') # FIX change this
+
+test = pd.read_csv('data//Testing_oneperuser.csv') # FIX change this
 
 # Create Term-Document Matrix
 #vectorizer = slr.feature_extraction.text.CountVectorizer()
