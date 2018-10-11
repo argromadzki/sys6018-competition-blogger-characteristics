@@ -1,6 +1,9 @@
 # sys6018-competition-blogger-characteristics
+
 Karan Gadiya: Data Exploration and Processing, Model Development
+
 Alex Gromadzki: GitHub Coordinator, Data Exploration and Processing, Model Development
+
 Sean Mullane: Data Exploration and Processing, Model Development, "Admiral"
 
 Kaggle Competition 3
