@@ -41,6 +41,7 @@ train_EN_model(x_train_svd, y[inds], x_train_svd)
 # SVD on full matrix
 svd = TruncatedSVD(n_components=500)
 x_train_svd = svd.fit_transform(tfidf)
+x_test_svd = svd.transform(tfidf_test)
 explained_variance = svd.explained_variance_ratio_.sum()
 explained_variance
 
@@ -48,6 +49,10 @@ explained_variance
 x_train_all = pd.DataFrame(x_train_svd)
 x_train_all = x_train_all.join(pd.get_dummies(train['topic']))
 x_train_all = x_train_all.join(pd.get_dummies(train['gender']))
+
+x_test_all = pd.DataFrame(x_test_svd)
+x_test_all = x_test_all.join(pd.get_dummies(test['topic']))
+x_test_all = x_test_all.join(pd.get_dummies(test['gender']))
 
 train_EN_model(x_train_all, y, x_train_all)
 
@@ -57,7 +62,7 @@ enmodel.fit(x_train_all, y)
 print(enmodel.coef_)
 preds = enmodel.predict(x_train_all)
 
-# Do postprocessing of predictions
+# Do postprocessing of predictions FOR TRAINING SET
 
 outputs = train[['post.id', 'user.id', 'age']]
 outputs['age_pred'] = preds
@@ -82,6 +87,22 @@ np.sum(np.square(outputs_agg['age_pred_mean'] - outputs_agg['age']))/12800
 np.sum(np.square(outputs_agg['age_pred_m-1'] - outputs_agg['age']))/12800
 np.sum(np.square(outputs_agg['age_pred_m+1'] - outputs_agg['age']))/12800
 
+
+
+# Do predictions and postprocessing FOR TESTING SET
+preds = enmodel.predict(x_test_all)
+outputs = test[['post.id', 'user.id']]
+outputs['age_pred'] = preds
+
+
+outputs_agg = outputs[['user.id']]
+outputs_agg.drop_duplicates(subset=['user.id'], keep='last', inplace=True)
+
+outputs = outputs.sort_values(by=['user.id'])
+outputs_agg = outputs_agg.sort_values(by=['user.id'])
+outputs_agg['age_pred_mean'] = outputs.groupby(['user.id'])['age_pred'].mean().values
+
+outputs_agg.to_csv("py_predictions_01.csv")
 
 # Cribbed from https://github.com/wjlei1990/EarlyWarning/blob/master/ml/regressor.py
 def train_EN_model(train_x, train_y, predict_x):
