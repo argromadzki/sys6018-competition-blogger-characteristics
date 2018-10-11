@@ -33,6 +33,15 @@ train = train[train['date_date'].notnull()]
 train.date = train.date_date
 train = train.drop(['date_date'], axis=1)
 
+# Optional: concatenate posts to single 
+train_text = train[['post.id','user.id','gender','topic','sign','date','text', 'age']].groupby(['user.id'])['text'].transform(lambda x: ','.join(x))
+train['text'] = train_text
+train.drop_duplicates(subset=['user.id'], keep='last', inplace=True)
+
+test_text = test[['post.id','user.id','gender','topic','sign','date','text']].groupby(['user.id'])['text'].transform(lambda x: ','.join(x))
+test['text'] = test_text
+test.drop_duplicates(subset=['user.id'], keep='last', inplace=True)
+
 porter = nltk.stem.porter.PorterStemmer()
 from nltk.corpus import stopwords
 stop_words = set(stopwords.words('english'))

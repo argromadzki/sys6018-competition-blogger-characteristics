@@ -89,6 +89,7 @@ np.sum(np.square(outputs_agg['age_pred_m+1'] - outputs_agg['age']))/12800
 
 
 
+
 # Do predictions and postprocessing FOR TESTING SET
 preds = enmodel.predict(x_test_all)
 outputs = test[['post.id', 'user.id']]
@@ -102,7 +103,14 @@ outputs = outputs.sort_values(by=['user.id'])
 outputs_agg = outputs_agg.sort_values(by=['user.id'])
 outputs_agg['age_pred_mean'] = outputs.groupby(['user.id'])['age_pred'].mean().values
 
-outputs_agg.to_csv("py_predictions_01.csv")
+# do silly transformation for outputs
+
+outputs_agg['age_pred_mean'] = np.where((outputs_agg['age_pred_mean'] > 17) & (outputs_agg['age_pred_mean'] < 21), 17, outputs_agg['age_pred_mean'])
+outputs_agg['age_pred_mean'] = np.where((outputs_agg['age_pred_mean'] > 20) & (outputs_agg['age_pred_mean'] < 23), 23, outputs_agg['age_pred_mean'])
+outputs_agg['age_pred_mean'] = np.where((outputs_agg['age_pred_mean'] > 27) & (outputs_agg['age_pred_mean'] < 31), 27, outputs_agg['age_pred_mean'])
+outputs_agg['age_pred_mean'] = np.where((outputs_agg['age_pred_mean'] > 30) & (outputs_agg['age_pred_mean'] < 31), 33, outputs_agg['age_pred_mean'])
+
+outputs_agg.to_csv("py_predictions_01_mod.csv")
 
 # Cribbed from https://github.com/wjlei1990/EarlyWarning/blob/master/ml/regressor.py
 def train_EN_model(train_x, train_y, predict_x):
